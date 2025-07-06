@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Page That Slowly Tilts Itself</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f0f0f0;
+            font-family: Arial, sans-serif;
+            transition: transform 0.5s ease;
+            transform-origin: center center;
+        }
+        .content {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .tilt-display {
+            font-size: 1.5rem;
+            margin: 1rem 0;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1>This Page is Straight... For Now</h1>
+        <p>Just wait a few seconds...</p>
+        <div class="tilt-display">Current Tilt: <span id="tilt-display">0°</span></div>
+    </div>
+
+    <script>
+        let tilt = 0;
+        const maxTilt = 15; // Maximum tilt in degrees
+        let tiltDirection = 1; // 1 for right, -1 for left
+        
+        function updateTilt() {
+            // Update tilt
+            tilt += 0.1 * tiltDirection;
+            
+            // Reverse direction at max tilt
+            if (Math.abs(tilt) >= maxTilt) {
+                tiltDirection *= -1;
+            }
+            
+            // Apply the tilt
+            document.body.style.transform = `rotate(${tilt}deg)`;
+            
+            // Update the display
+            document.getElementById('tilt-display').textContent = `${tilt.toFixed(1)}°`;
+            
+            // Continue the animation
+            requestAnimationFrame(updateTilt);
+        }
+        
+        // Start the animation after a short delay
+        setTimeout(() => {
+            document.querySelector('h1').textContent = 'Tilting has begun...';
+            updateTilt();
+        }, 2000);
+        
+        // Add some mouse movement effect
+        document.addEventListener('mousemove', (e) => {
+            const x = (e.clientX / window.innerWidth - 0.5) * 10;
+            const y = (e.clientY / window.innerHeight - 0.5) * 10;
+            document.body.style.transform = `rotateX(${y}deg) rotateY(${x}deg) rotate(${tilt}deg)`;
+        });
+    </script>
+</body>
+</html>

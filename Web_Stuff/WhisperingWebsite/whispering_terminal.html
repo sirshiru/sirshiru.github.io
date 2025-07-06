@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whispering Website</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: none;
+        }
+        
+        .terminal {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 800px;
+            max-height: 600px;
+            background: rgba(0, 20, 0, 0.9);
+            border: 1px solid #0a0;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .terminal-header {
+            padding: 5px 10px;
+            background: #001100;
+            border-bottom: 1px solid #0a0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .terminal-title {
+            color: #0f0;
+            font-size: 0.9rem;
+        }
+        
+        .terminal-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .terminal-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 1px solid #0a0;
+        }
+        
+        .terminal-button.close { background: #f00; }
+        .terminal-button.minimize { background: #ff0; }
+        .terminal-button.maximize { background: #0f0; }
+        
+        .terminal-content {
+            padding: 15px;
+            height: calc(100% - 60px);
+            overflow-y: auto;
+            line-height: 1.5;
+            position: relative;
+        }
+        
+        .prompt {
+            color: #0f0;
+            margin-right: 5px;
+        }
+        
+        .input-line {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        #command-input {
+            background: transparent;
+            border: none;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            width: calc(100% - 50px);
+            outline: none;
+            caret-shape: block;
+        }
+        
+        .whisper {
+            position: absolute;
+            color: rgba(0, 255, 0, 0.7);
+            font-style: italic;
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+            opacity: 0;
+            transition: opacity 2s, transform 2s;
+            pointer-events: none;
+            white-space: nowrap;
+            z-index: 10;
+        }
+        
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 20px;
+            background: #0f0;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+            margin-left: 2px;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        .glitch {
+            position: relative;
+        }
+        
+        .glitch::before, .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 20, 0, 0.9);
+        }
+        
+        .glitch::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff00ff;
+            animation: glitch-anim-1 2s infinite linear alternate-reverse;
+        }
+        
+        .glitch::after {
+            left: -2px;
+            text-shadow: 2px 0 #00ffff;
+            animation: glitch-anim-2 2s infinite linear alternate-reverse;
+        }
+        
+        @keyframes glitch-anim-1 {
+            0% { clip-path: inset(20% 0 50% 0); }
+            20% { clip-path: inset(80% 0 10% 0); }
+            40% { clip-path: inset(30% 0 60% 0); }
+            60% { clip-path: inset(70% 0 20% 0); }
+            80% { clip-path: inset(10% 0 60% 0); }
+            100% { clip-path: inset(40% 0 40% 0); }
+        }
+        
+        @keyframes glitch-anim-2 {
+            0% { clip-path: inset(30% 0 40% 0); }
+            20% { clip-path: inset(10% 0 60% 0); }
+            40% { clip-path: inset(70% 0 20% 0); }
+            60% { clip-path: inset(20% 0 50% 0); }
+            80% { clip-path: inset(60% 0 30% 0); }
+            100% { clip-path: inset(10% 0 70% 0); }
+        }
+        
+        .typing {
+            border-right: 2px solid #0f0;
+            animation: typing 0.5s step-end infinite;
+        }
+        
+        @keyframes typing {
+            from, to { border-color: transparent; }
+            50% { border-color: #0f0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal">
+        <div class="terminal-header">
+            <div class="terminal-buttons">
+                <div class="terminal-button close"></div>
+                <div class="terminal-button minimize"></div>
+                <div class="terminal-button maximize"></div>
+            </div>
+            <div class="terminal-title">whisper@terminal:~</div>
+            <div style="width: 60px;"></div>
+        </div>
+        <div class="terminal-content" id="terminal">
+            <div>Welcome to the Whispering Terminal</div>
+            <div>Type 'help' for available commands</div>
+            <div class="input-line">
+                <span class="prompt">user@whisper:~$</span>
+                <input type="text" id="command-input" autofocus>
+                <span class="cursor"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const terminal = document.getElementById('terminal');
+        const commandInput = document.getElementById('command-input');
+        
+        // List of creepy whispers
+        const whispers = [
+            "i can see you",
+            "don't turn around",
+            "they're watching",
+            "you're not alone",
+            "listen carefully",
+            "can you hear them?",
+            "behind you",
+            "the walls are whispering",
+            "they know you're here",
+            "don't trust your eyes",
+            "the shadows move",
+            "it's not your imagination",
+            "they're getting closer",
+            "can you feel it?",
+            "the air is getting colder",
+            "something's not right",
+            "you should run",
+            "too late now",
+            "they're here",
+            "wake up"
+        ];
+        
+        // List of system responses
+        const systemResponses = [
+            "Command not found",
+            "Permission denied",
+            "Access restricted",
+            "Invalid syntax",
+            "Connection lost",
+            "System error",
+            "File not found",
+            "Out of memory",
+            "Segmentation fault",
+            "I/O error"
+        ];
+        
+        // Show a random whisper
+        function showWhisper() {
+            const whisper = document.createElement('div');
+            whisper.className = 'whisper';
+            whisper.textContent = whispers[Math.floor(Math.random() * whispers.length)];
+            
+            // Random position
+            const x = Math.random() * (window.innerWidth - 200) + 100;
+            const y = Math.random() * (window.innerHeight - 100) + 50;
+            whisper.style.left = `${x}px`;
+            whisper.style.top = `${y}px`;
+            
+            // Random rotation
+            const rotation = (Math.random() * 40) - 20;
+            whisper.style.transform = `rotate(${rotation}deg)`;
+            
+            // Random size
+            const size = Math.random() * 0.5 + 0.8;
+            whisper.style.fontSize = `${size}rem`;
+            
+            // Add to document
+            document.body.appendChild(whisper);
+            
+            // Fade in
+            setTimeout(() => {
+                whisper.style.opacity = '1';
+                
+                // Fade out and remove
+                setTimeout(() => {
+                    whisper.style.opacity = '0';
+                    setTimeout(() => {
+                        if (whisper.parentNode) {
+                            document.body.removeChild(whisper);
+                        }
+                    }, 2000);
+                }, 3000);
+            }, 100);
+            
+            // Schedule next whisper
+            scheduleNextWhisper();
+        }
+        
+        // Schedule the next whisper
+        function scheduleNextWhisper() {
+            const delay = Math.random() * 10000 + 5000; // 5-15 seconds
+            setTimeout(showWhisper, delay);
+        }
+        
+        // Start the whispers
+        scheduleNextWhisper();
+        
+        // Handle command input
+        commandInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const command = commandInput.value.trim().toLowerCase();
+                addLine(`user@whisper:~$ ${command}`, 'user-input');
+                
+                // Process command
+                if (command === 'help') {
+                    addLine('Available commands:');
+                    addLine('  help     - Show this help');
+                    addLine('  clear    - Clear the terminal');
+                    addLine('  exit     - Close the terminal');
+                    addLine('  whoami   - Who are you?');
+                    addLine('  date     - Current date and time');
+                } else if (command === 'clear') {
+                    clearTerminal();
+                } else if (command === 'exit') {
+                    // Fake exit
+                    addLine('Terminal session ended.');
+                    addLine('Disconnected.');
+                    commandInput.disabled = true;
+                    
+                    // Show creepy message after a delay
+                    setTimeout(() => {
+                        const glitch = document.createElement('div');
+                        glitch.className = 'glitch';
+                        glitch.textContent = 'YOU CANNOT LEAVE';
+                        glitch.style.fontSize = '2rem';
+                        glitch.style.textAlign = 'center';
+                        glitch.style.marginTop = '50px';
+                        glitch.dataset.text = 'YOU CANNOT LEAVE';
+                        terminal.appendChild(glitch);
+                        
+                        // Re-enable input after a while
+                        setTimeout(() => {
+                            if (glitch.parentNode) {
+                                terminal.removeChild(glitch);
+                            }
+                            commandInput.disabled = false;
+                            commandInput.value = '';
+                            commandInput.focus();
+                            addLine('user@whisper:~$', 'prompt');
+                        }, 3000);
+                    }, 1000);
+                    
+                    return;
+                } else if (command === 'whoami') {
+                    addLine('You are the one who is being watched.');
+                } else if (command === 'date') {
+                    const now = new Date();
+                    addLine(now.toString());
+                } else if (command) {
+                    // Random system error
+                    const error = systemResponses[Math.floor(Math.random() * systemResponses.length)];
+                    addLine(`bash: ${command}: ${error}`, 'error');
+                    
+                    // Sometimes show a whisper after an error
+                    if (Math.random() < 0.3) {
+                        setTimeout(() => {
+                            showWhisper();
+                        }, 1000);
+                    }
+                }
+                
+                // Add new prompt
+                addLine('user@whisper:~$', 'prompt');
+                commandInput.value = '';
+                
+                // Scroll to bottom
+                terminal.scrollTop = terminal.scrollHeight;
+            }
+        });
+        
+        // Add a line to the terminal
+        function addLine(text, className = '') {
+            const line = document.createElement('div');
+            if (className) line.className = className;
+            line.textContent = text;
+            terminal.appendChild(line);
+            return line;
+        }
+        
+        // Clear the terminal
+        function clearTerminal() {
+            // Remove all child nodes except the last one (input line)
+            while (terminal.children.length > 1) {
+                terminal.removeChild(terminal.firstChild);
+            }
+        }
+        
+        // Initial focus on input
+        commandInput.focus();
+        
+        // Show a random system message every now and then
+        setInterval(() => {
+            if (Math.random() < 0.2) {
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString();
+                const message = `[${timeStr}] System: ${systemResponses[Math.floor(Math.random() * systemResponses.length)]}`;
+                const line = addLine(message, 'system-message');
+                line.style.opacity = '0';
+                line.style.transition = 'opacity 1s';
+                
+                // Fade in
+                setTimeout(() => {
+                    line.style.opacity = '0.7';
+                    
+                    // Fade out and remove
+                    setTimeout(() => {
+                        line.style.opacity = '0';
+                        setTimeout(() => {
+                            if (line.parentNode) {
+                                terminal.removeChild(line);
+                            }
+                        }, 1000);
+                    }, 3000);
+                }, 100);
+                
+                // Scroll to show new message
+                terminal.scrollTop = terminal.scrollHeight;
+            }
+        }, 10000);
+        
+        // Make the terminal draggable
+        const terminalElement = document.querySelector('.terminal');
+        const header = document.querySelector('.terminal-header');
+        let isDragging = false;
+        let offsetX, offsetY;
+        
+        header.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            const rect = terminalElement.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+            terminalElement.style.cursor = 'grabbing';
+            e.preventDefault();
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            
+            terminalElement.style.position = 'absolute';
+            terminalElement.style.left = `${e.clientX - offsetX}px`;
+            terminalElement.style.top = `${e.clientY - offsetY}px`;
+            terminalElement.style.transform = 'none';
+        });
+        
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            terminalElement.style.cursor = 'default';
+        });
+        
+        // Prevent text selection while dragging
+        header.addEventListener('selectstart', (e) => {
+            if (isDragging) {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>

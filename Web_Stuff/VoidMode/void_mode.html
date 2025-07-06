@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Void Mode Activator</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            transition: background-color 0.5s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .container {
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 80%;
+            transition: all 0.5s ease;
+        }
+        
+        h1 {
+            margin: 0 0 1rem 0;
+            color: #333;
+            transition: all 0.5s ease;
+        }
+        
+        p {
+            margin: 0.5rem 0;
+            color: #555;
+            transition: all 0.5s ease;
+        }
+        
+        .dark-mode {
+            background: #111;
+            color: #fff;
+        }
+        
+        .dark-mode .container {
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+        }
+        
+        .dark-mode h1, .dark-mode p {
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        .void-level {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 1000;
+            color: white;
+            font-size: 2rem;
+            text-align: center;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+        
+        .void-text {
+            margin-bottom: 2rem;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+        
+        .void-button {
+            padding: 1rem 2rem;
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease 0.3s;
+        }
+        
+        .void-button:hover {
+            background: #ff0000;
+        }
+        
+        .whisper {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.9rem;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 2s ease;
+        }
+        
+        .visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Void Mode Activator</h1>
+        <p>Click anywhere to activate Void Mode</p>
+        <p class="small">(Each click makes it darker)</p>
+    </div>
+    
+    <div class="void-level" id="voidLevel">
+        <div class="void-text" id="voidText">The Void welcomes you...</div>
+        <button class="void-button" id="voidButton">Escape the Void</button>
+    </div>
+    
+    <div class="whisper" id="whisper">*listen closely*</div>
+
+    <script>
+        const body = document.body;
+        const voidLevel = document.getElementById('voidLevel');
+        const voidText = document.getElementById('voidText');
+        const voidButton = document.getElementById('voidButton');
+        const whisper = document.getElementById('whisper');
+        
+        let clickCount = 0;
+        const maxClicks = 5;
+        
+        // List of creepy messages for the void
+        const voidMessages = [
+            "The Void is watching...",
+            "Darkness surrounds you...",
+            "You can't escape...",
+            "The Void consumes all...",
+            "There is no way back...",
+            "You are not alone...",
+            "The Void is hungry...",
+            "Let go...",
+            "Become one with the Void...",
+            "Resistance is futile..."
+        ];
+        
+        // List of whispers
+        const whispers = [
+            "turn back...",
+            "it's not safe...",
+            "they're watching...",
+            "you shouldn't be here...",
+            "it's too late...",
+            "the void is calling...",
+            "can you hear them?...",
+            "don't look behind you...",
+            "they're coming...",
+            "it's already here..."
+        ];
+        
+        // Handle clicks
+        document.addEventListener('click', () => {
+            clickCount++;
+            
+            // Calculate darkness level (0 to 1)
+            const darkness = Math.min(clickCount / maxClicks, 1);
+            
+            // Update body background
+            const bgValue = Math.floor(255 * (1 - darkness * 0.9));
+            body.style.backgroundColor = `rgb(${bgValue}, ${bgValue}, ${bgValue})`;
+            
+            // Update text color
+            const textValue = Math.floor(255 * (0.2 + darkness * 0.8));
+            document.querySelectorAll('h1, p').forEach(el => {
+                el.style.color = `rgb(${textValue}, ${textValue}, ${textValue})`;
+                el.style.textShadow = `0 0 ${darkness * 10}px rgba(${textValue}, ${textValue}, ${textValue}, ${0.2 + darkness * 0.8})`;
+            });
+            
+            // Update container background
+            const containerBg = Math.floor(255 * (0.9 - darkness * 0.8));
+            document.querySelector('.container').style.background = 
+                `rgba(${containerBg}, ${containerBg}, ${containerBg}, ${0.9 - darkness * 0.5})`;
+            
+            // Show void level if max darkness reached
+            if (clickCount >= maxClicks) {
+                activateVoidMode();
+            } else if (clickCount === maxClicks - 1) {
+                // Show warning on last click before void
+                document.querySelector('.small').textContent = "One more click...";
+                document.querySelector('.small').style.color = '#ff5555';
+                document.querySelector('.small').style.fontWeight = 'bold';
+            } else {
+                // Show click count
+                document.querySelector('.small').textContent = 
+                    `(${maxClicks - clickCount} more ${clickCount === maxClicks - 2 ? 'click' : 'clicks'} to void...)`;
+            }
+            
+            // Random chance to show a whisper
+            if (Math.random() < 0.3) {
+                showWhisper();
+            }
+        });
+        
+        // Activate void mode
+        function activateVoidMode() {
+            voidLevel.style.display = 'flex';
+            
+            // Animate text and button in
+            setTimeout(() => {
+                voidText.classList.add('visible');
+                voidButton.classList.add('visible');
+            }, 500);
+            
+            // Change void text periodically
+            setInterval(() => {
+                voidText.textContent = voidMessages[Math.floor(Math.random() * voidMessages.length)];
+            }, 3000);
+            
+            // Show whispers more frequently in void mode
+            setInterval(() => {
+                if (Math.random() < 0.5) {
+                    showWhisper();
+                }
+            }, 5000);
+        }
+        
+        // Show a random whisper
+        function showWhisper() {
+            whisper.textContent = whispers[Math.floor(Math.random() * whispers.length)];
+            whisper.style.opacity = '1';
+            
+            // Hide after delay
+            setTimeout(() => {
+                whisper.style.opacity = '0';
+            }, 3000);
+        }
+        
+        // Handle escape button
+        voidButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            // Hide void level
+            voidLevel.style.display = 'none';
+            voidText.classList.remove('visible');
+            voidButton.classList.remove('visible');
+            
+            // Reset everything
+            clickCount = 0;
+            body.style.backgroundColor = '';
+            document.querySelector('.container').style.background = '';
+            document.querySelector('.small').textContent = '(Each click makes it darker)';
+            document.querySelector('.small').style.color = '';
+            document.querySelector('.small').style.fontWeight = '';
+            
+            // Show escaped message
+            const escapedMsg = document.createElement('div');
+            escapedMsg.textContent = 'You escaped the Void... for now.';
+            escapedMsg.style.position = 'fixed';
+            escapedMsg.style.top = '20px';
+            escapedMsg.style.left = '50%';
+            escapedMsg.style.transform = 'translateX(-50%)';
+            escapedMsg.style.background = 'rgba(0, 0, 0, 0.8)';
+            escapedMsg.style.color = 'white';
+            escapedMsg.style.padding = '10px 20px';
+            escapedMsg.style.borderRadius = '20px';
+            escapedMsg.style.zIndex = '1000';
+            escapedMsg.style.animation = 'fadeOut 2s 2s forwards';
+            
+            // Add animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeOut {
+                    to { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(escapedMsg);
+            
+            // Remove after animation
+            setTimeout(() => {
+                document.body.removeChild(escapedMsg);
+                document.head.removeChild(style);
+            }, 4000);
+        });
+        
+        // Initial whisper after a delay
+        setTimeout(showWhisper, 5000);
+    </script>
+</body>
+</html>
