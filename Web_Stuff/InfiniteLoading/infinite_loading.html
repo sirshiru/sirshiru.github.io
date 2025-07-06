@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinite Loading...</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #f0f0f0;
+            overflow: hidden;
+        }
+        
+        .loader {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 2s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .progress {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: #3498db;
+            transition: width 0.3s;
+        }
+        
+        .fake-percentage {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin: 10px 0;
+        }
+        
+        .fake-files {
+            text-align: left;
+            margin-top: 20px;
+            color: #666;
+            font-family: monospace;
+            max-height: 200px;
+            overflow-y: auto;
+            background: #f8f8f8;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="loader">
+        <div class="spinner"></div>
+        <h2>Loading Content...</h2>
+        <div class="fake-percentage" id="percentage">0%</div>
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="fake-files" id="fileList">
+            <div>Initializing loading sequence...</div>
+        </div>
+    </div>
+
+    <script>
+        const percentage = document.getElementById('percentage');
+        const progressBar = document.getElementById('progressBar');
+        const fileList = document.getElementById('fileList');
+        
+        const fakeFiles = [
+            'loading_assets.js', 'styles.css', 'content.json', 'animations.js',
+            'images/background.jpg', 'config.ini', 'user_prefs.dat', 'utils.js',
+            'api_endpoints.js', 'analytics.js', 'fonts/roboto.woff2', 'sounds/click.mp3'
+        ];
+        
+        let progress = 0;
+        let currentFile = 0;
+        
+        function updateProgress() {
+            // Never reach 100%
+            if (progress >= 99) {
+                progress = 90 + Math.random() * 5;
+                setTimeout(updateProgress, 1000);
+                return;
+            }
+            
+            // Increment progress
+            progress += Math.random() * 5;
+            if (progress > 99) progress = 99;
+            
+            // Update UI
+            percentage.textContent = Math.floor(progress) + '%';
+            progressBar.style.width = progress + '%';
+            
+            // Add random file loading
+            if (currentFile < fakeFiles.length) {
+                const fileDiv = document.createElement('div');
+                fileDiv.textContent = `Loading ${fakeFiles[currentFile]}...`;
+                fileList.appendChild(fileDiv);
+                fileList.scrollTop = fileList.scrollHeight;
+                currentFile++;
+            } else {
+                // Start reusing files with different statuses
+                const statuses = ['Verifying', 'Optimizing', 'Caching', 'Processing'];
+                const randomFile = fakeFiles[Math.floor(Math.random() * fakeFiles.length)];
+                const status = statuses[Math.floor(Math.random() * statuses.length)];
+                
+                const fileDiv = document.createElement('div');
+                fileDiv.textContent = `${status} ${randomFile}...`;
+                fileList.appendChild(fileDiv);
+                
+                // Keep only last 20 entries
+                while (fileList.children.length > 20) {
+                    fileList.removeChild(fileList.firstChild);
+                }
+                
+                fileList.scrollTop = fileList.scrollHeight;
+            }
+            
+            // Random delay between 100-800ms
+            const delay = 100 + Math.random() * 700;
+            setTimeout(updateProgress, delay);
+        }
+        
+        // Start the fake loading
+        setTimeout(updateProgress, 1000);
+        
+        // Change cursor to loading
+        document.body.style.cursor = 'wait';
+        
+        // Prevent right-click
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            return false;
+        });
+        
+        // Make it hard to leave
+        window.onbeforeunload = function() {
+            return "Are you sure you want to leave? The page is still loading...";
+        };
+    </script>
+</body>
+</html>

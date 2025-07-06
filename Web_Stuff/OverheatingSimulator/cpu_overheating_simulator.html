@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPU Overheating Simulator</title>
+    <style>
+        :root {
+            --temp-color: #4CAF50;
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --warning-color: #ff9800;
+            --danger-color: #f44336;
+            --critical-color: #d32f2f;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.5s;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 800px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 2;
+        }
+        
+        h1 {
+            color: var(--temp-color);
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+        
+        .temperature {
+            font-size: 5rem;
+            font-weight: bold;
+            margin: 20px 0;
+            font-family: 'Digital-7', 'Courier New', monospace;
+            color: var(--temp-color);
+            text-shadow: 0 0 15px currentColor;
+            transition: color 0.5s;
+        }
+        
+        .gauge {
+            width: 100%;
+            height: 30px;
+            background: #333;
+            border-radius: 15px;
+            margin: 20px 0;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        .gauge-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--temp-color);
+            border-radius: 15px;
+            transition: width 0.5s, background 0.5s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .gauge-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                to right,
+                rgba(255, 255, 255, 0.1) 0%,
+                rgba(255, 255, 255, 0.3) 50%,
+                rgba(255, 255, 255, 0.1) 100%
+            );
+            animation: shine 2s infinite;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%) skewX(-30deg); }
+            100% { transform: translateX(200%) skewX(-30deg); }
+        }
+        
+        .status {
+            font-size: 1.5rem;
+            margin: 10px 0;
+            color: var(--temp-color);
+            min-height: 2rem;
+            transition: color 0.5s;
+        }
+        
+        .warning {
+            color: var(--warning-color);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .danger {
+            color: var(--danger-color);
+            animation: pulse 1s infinite;
+        }
+        
+        .critical {
+            color: var(--critical-color);
+            animation: pulse 0.5s infinite, shake 0.2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .stat {
+            margin: 10px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            min-width: 150px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .fan {
+            margin: 20px 0;
+            font-size: 3rem;
+            transition: transform 0.3s;
+            display: inline-block;
+        }
+        
+        .fan.spinning {
+            animation: spin 0.5s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .smoke {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 1s;
+            background: radial-gradient(ellipse at center, rgba(255,100,0,0.1) 0%, rgba(0,0,0,0) 70%);
+        }
+        
+        .smoke.visible {
+            opacity: 1;
+        }
+        
+        .explosion {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ff5722;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 100;
+            transition: opacity 0.5s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 5rem;
+            color: white;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        
+        .explosion.visible {
+            opacity: 0.9;
+            animation: flash 0.5s infinite;
+        }
+        
+        @keyframes flash {
+            0%, 100% { opacity: 0.9; }
+            50% { opacity: 0.7; }
+        }
+        
+        .particle {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+        }
+        
+        .reset-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: background 0.3s;
+            display: none;
+        }
+        
+        .reset-btn:hover {
+            background: #555;
+        }
+        
+        .cpu-load {
+            width: 100%;
+            height: 100px;
+            margin: 20px 0;
+            position: relative;
+            border: 1px solid #333;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .cpu-load-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background: var(--temp-color);
+            transition: height 0.5s, background 0.5s;
+        }
+        
+        .cpu-load-graph {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.3;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(255,255,255,0.05),
+                rgba(255,255,255,0.05) 10px,
+                rgba(0,0,0,0.1) 10px,
+                rgba(0,0,0,0.1) 20px
+            );
+        }
+        
+        .cpu-load-labels {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 0 10px;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.8rem;
+        }
+    </style>
+    <link href="https://fonts.cdnfonts.com/css/digital-7" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>CPU OVERHEATING SIMULATOR</h1>
+        <div class="temperature" id="temperature">45°C</div>
+        <div class="status" id="status">NORMAL</div>
+        
+        <div class="gauge">
+            <div class="gauge-fill" id="gauge"></div>
+        </div>
+        
+        <div class="fan" id="fan">💨</div>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-label">CPU LOAD</div>
+                <div class="stat-value" id="cpuLoad">15%</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">FAN SPEED</div>
+                <div class="stat-value" id="fanSpeed">1200 RPM</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">VOLTAGE</div>
+                <div class="stat-value" id="voltage">1.25V</div>
+            </div>
+        </div>
+        
+        <div class="cpu-load">
+            <div class="cpu-load-graph"></div>
+            <div class="cpu-load-line" id="cpuLoadLine"></div>
+            <div class="cpu-load-labels">
+                <span>0%</span>
+                <span>25%</span>
+                <span>50%</span>
+                <span>75%</span>
+                <span>100%</span>
+            </div>
+        </div>
+        
+        <button class="reset-btn" id="resetBtn">RESET SIMULATOR</button>
+    </div>
+    
+    <div class="smoke" id="smoke"></div>
+    <div class="explosion" id="explosion">
+        <div>💥 SYSTEM OVERHEATED 💥</div>
+    </div>
+    
+    <script>
+        // DOM Elements
+        const temperatureEl = document.getElementById('temperature');
+        const statusEl = document.getElementById('status');
+        const gaugeEl = document.getElementById('gauge');
+        const fanEl = document.getElementById('fan');
+        const cpuLoadEl = document.getElementById('cpuLoad');
+        const fanSpeedEl = document.getElementById('fanSpeed');
+        const voltageEl = document.getElementById('voltage');
+        const cpuLoadLineEl = document.getElementById('cpuLoadLine');
+        const smokeEl = document.getElementById('smoke');
+        const explosionEl = document.getElementById('explosion');
+        const resetBtn = document.getElementById('resetBtn');
+        
+        // State
+        let temperature = 45;
+        let cpuLoad = 15;
+        let fanSpeed = 1200;
+        let voltage = 1.25;
+        let isOverheated = false;
+        let gameLoop;
+        
+        // Temperature thresholds
+        const THRESHOLDS = {
+            NORMAL: { max: 60, color: '#4CAF50', status: 'NORMAL' },
+            WARNING: { max: 80, color: '#FFC107', status: 'WARNING' },
+            DANGER: { max: 95, color: '#FF5722', status: 'DANGER' },
+            CRITICAL: { max: 110, color: '#F44336', status: 'CRITICAL' }
+        };
+        
+        // Initialize
+        function init() {
+            temperature = 45;
+            cpuLoad = 15;
+            fanSpeed = 1200;
+            voltage = 1.25;
+            isOverheated = false;
+            
+            // Reset UI
+            updateUI();
+            fanEl.classList.remove('spinning');
+            smokeEl.classList.remove('visible');
+            explosionEl.classList.remove('visible');
+            resetBtn.style.display = 'none';
+            
+            // Start the simulation
+            if (gameLoop) clearInterval(gameLoop);
+            gameLoop = setInterval(update, 1000);
+            
+            // Start with fan off
+            setTimeout(() => {
+                fanEl.classList.add('spinning');
+            }, 1000);
+        }
+        
+        // Update simulation
+        function update() {
+            if (isOverheated) return;
+            
+            // Random fluctuations
+            const loadChange = (Math.random() - 0.4) * 10;
+            const tempChange = (Math.random() - 0.3) * 2;
+            
+            // Update CPU load (5% to 100%)
+            cpuLoad = Math.min(100, Math.max(5, cpuLoad + loadChange));
+            
+            // Update temperature based on load and fan speed
+            const tempIncrease = (cpuLoad / 20) * (1 - (fanSpeed / 5000));
+            temperature = Math.min(120, Math.max(30, temperature + tempIncrease + tempChange));
+            
+            // Update fan speed based on temperature
+            if (temperature > 70) {
+                fanSpeed = Math.min(5000, fanSpeed + 100);
+            } else if (temperature < 50) {
+                fanSpeed = Math.max(800, fanSpeed - 50);
+            }
+            
+            // Update voltage (slight fluctuations)
+            voltage = 1.2 + (Math.random() * 0.2);
+            
+            // Check for overheating
+            if (temperature >= 110 && !isOverheated) {
+                overheat();
+                return;
+            }
+            
+            updateUI();
+        }
+        
+        // Update UI based on current state
+        function updateUI() {
+            // Update temperature display
+            temperatureEl.textContent = `${Math.round(temperature)}°C`;
+            
+            // Update CPU load
+            cpuLoadEl.textContent = `${Math.round(cpuLoad)}%`;
+            cpuLoadLineEl.style.height = `${cpuLoad}%`;
+            
+            // Update fan speed
+            fanSpeedEl.textContent = `${Math.round(fanSpeed)} RPM`;
+            
+            // Update voltage
+            voltageEl.textContent = `${voltage.toFixed(2)}V`;
+            
+            // Determine status and update colors
+            let status = '';
+            let color = '';
+            
+            if (temperature < THRESHOLDS.NORMAL.max) {
+                status = THRESHOLDS.NORMAL.status;
+                color = THRESHOLDS.NORMAL.color;
+                statusEl.className = 'status';
+            } else if (temperature < THRESHOLDS.WARNING.max) {
+                status = THRESHOLDS.WARNING.status;
+                color = THRESHOLDS.WARNING.color;
+                statusEl.className = 'status warning';
+            } else if (temperature < THRESHOLDS.DANGER.max) {
+                status = THRESHOLDS.DANGER.status;
+                color = THRESHOLDS.DANGER.color;
+                statusEl.className = 'status danger';
+                
+                // Show smoke at high temps
+                if (temperature > 85) {
+                    smokeEl.classList.add('visible');
+                } else {
+                    smokeEl.classList.remove('visible');
+                }
+            } else {
+                status = THRESHOLDS.CRITICAL.status;
+                color = THRESHOLDS.CRITICAL.color;
+                statusEl.className = 'status critical';
+                smokeEl.classList.add('visible');
+            }
+            
+            statusEl.textContent = status;
+            temperatureEl.style.color = color;
+            gaugeEl.style.background = color;
+            gaugeEl.style.width = `${(temperature / 120) * 100}%`;
+            cpuLoadLineEl.style.background = color;
+            
+            // Update fan speed animation
+            fanEl.style.animationDuration = `${2 - (fanSpeed / 5000)}s`;
+        }
+        
+        // Handle overheating
+        function overheat() {
+            isOverheated = true;
+            clearInterval(gameLoop);
+            
+            // Show explosion
+            explosionEl.classList.add('visible');
+            
+            // Create particles
+            createParticles();
+            
+            // Show reset button
+            resetBtn.style.display = 'block';
+            
+            // Play sound (in a real implementation, you would uncomment this)
+            // const boom = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-explosion-1689.mp3');
+            // boom.volume = 0.5;
+            // boom.play();
+        }
+        
+        // Create explosion particles
+        function createParticles() {
+            const colors = ['#ff5722', '#ffeb3b', '#ff9800', '#f44336', '#ffc107'];
+            
+            for (let i = 0; i < 100; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Random size
+                const size = Math.random() * 20 + 5;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Random color
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                // Random position
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                
+                // Random animation
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 50 + Math.random() * 100;
+                const duration = 1 + Math.random() * 2;
+                
+                particle.style.transform = `translate(-50%, -50%)`;
+                particle.style.transition = `all ${duration}s ease-out`;
+                
+                document.body.appendChild(particle);
+                
+                // Animate
+                setTimeout(() => {
+                    particle.style.opacity = '1';
+                    particle.style.transform = `translate(
+                        calc(-50% + ${Math.cos(angle) * distance}px), 
+                        calc(-50% + ${Math.sin(angle) * distance}px)
+                    )`;
+                    particle.style.opacity = '0';
+                    
+                    // Remove after animation
+                    setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
+                        }
+                    }, duration * 1000);
+                }, 10);
+            }
+        }
+        
+        // Event listeners
+        resetBtn.addEventListener('click', init);
+        
+        // Start the simulation
+        init();
+        
+        // Make the fan clickable to cool down
+        fanEl.addEventListener('click', () => {
+            if (!isOverheated) {
+                fanSpeed = Math.min(5000, fanSpeed + 500);
+                temperature = Math.max(30, temperature - 5);
+                updateUI();
+                
+                // Visual feedback
+                fanEl.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    fanEl.style.transform = 'scale(1)';
+                }, 200);
+            }
+        });
+        
+        // Make the CPU load clickable to increase load
+        cpuLoadEl.addEventListener('click', () => {
+            if (!isOverheated) {
+                cpuLoad = Math.min(100, cpuLoad + 10);
+                updateUI();
+                
+                // Visual feedback
+                cpuLoadEl.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    cpuLoadEl.style.transform = 'scale(1)';
+                }, 200);
+            }
+        });
+    </script>
+</body>
+</html>

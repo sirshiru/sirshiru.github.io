@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clown Mode Activated! 🤡</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+            background-color: #ffebee;
+            margin: 0;
+            overflow-x: hidden;
+            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='48' viewport='0 0 100 100' style='fill:black;font-size:24px;'><text y='50%'>🤡</text></svg>") 16 0, auto;
+            transition: background-color 0.3s;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        h1 {
+            color: #d32f2f;
+            font-size: 3rem;
+            text-shadow: 3px 3px 0 #ffeb3b;
+            margin-bottom: 20px;
+            animation: rainbow 5s infinite;
+        }
+        
+        @keyframes rainbow {
+            0% { color: #ff0000; }
+            14% { color: #ff7f00; }
+            28% { color: #ffff00; }
+            42% { color: #00ff00; }
+            57% { color: #0000ff; }
+            71% { color: #4b0082; }
+            85% { color: #9400d3; }
+            100% { color: #ff0000; }
+        }
+        
+        .clown-emoji {
+            position: fixed;
+            font-size: 30px;
+            pointer-events: none;
+            user-select: none;
+            z-index: 1000;
+            animation: float 3s infinite ease-in-out;
+            transform-origin: center center;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+        
+        .counter {
+            font-size: 2rem;
+            margin: 20px 0;
+            color: #9c27b0;
+            font-weight: bold;
+        }
+        
+        .controls {
+            margin: 20px 0;
+        }
+        
+        button {
+            background: #ff4081;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 20px;
+            font-family: 'Comic Sans MS', cursive;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        button:hover {
+            transform: scale(1.1);
+            background: #f50057;
+        }
+        
+        .clown-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+        
+        .clown-fact {
+            background: white;
+            border: 3px dashed #ff9800;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 20px 0;
+            display: inline-block;
+            max-width: 80%;
+        }
+        
+        .honk-button {
+            font-size: 2rem;
+            padding: 15px 30px;
+            background: #ffeb3b;
+            color: #ff5722;
+            border: 3px solid #ff9800;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .clown-facts {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: white;
+            border: 3px solid #ff4081;
+            border-radius: 10px;
+            padding: 10px;
+            max-width: 300px;
+            z-index: 100;
+        }
+        
+        .clown-facts h3 {
+            margin-top: 0;
+            color: #ff4081;
+        }
+        
+        .toggle-facts {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 101;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤡 CLOWN MODE ACTIVATED! 🤡</h1>
+        <div class="counter">Clowns created: <span id="clownCounter">0</span></div>
+        
+        <div class="controls">
+            <button id="honkButton" class="honk-button">HONK! 🤡</button>
+            <button id="rainbowMode">🌈 Rainbow Mode</button>
+            <button id="confettiMode">🎉 Confetti Mode</button>
+        </div>
+        
+        <div class="clown-fact" id="clownFact">
+            Did you know? The world record for most clowns in one place is 1,307!<br>
+            Let's beat that! Click anywhere to add more clowns! 🤡
+        </div>
+    </div>
+    
+    <div id="clownContainer"></div>
+    
+    <div class="clown-background" id="clownBackground"></div>
+    
+    <button class="toggle-facts" id="toggleFacts">🤔 Clown Facts</button>
+    <div class="clown-facts" id="clownFacts">
+        <h3>🤡 Clown Facts:</h3>
+        <p>• The word "clown" comes from the Icelandic word "klunni" meaning "clumsy person"</p>
+        <p>• The fear of clowns is called coulrophobia</p>
+        <p>• The first known clown was in ancient Egypt around 2500 BCE</p>
+        <p>• Clown noses are red because it's the first color to fade in low light</p>
+    </div>
+    
+    <audio id="honkSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-clown-horn-at-circus-708.mp3" type="audio/mpeg">
+    </audio>
+    
+    <script>
+        const clownContainer = document.getElementById('clownContainer');
+        const clownCounter = document.getElementById('clownCounter');
+        const honkButton = document.getElementById('honkButton');
+        const rainbowMode = document.getElementById('rainbowMode');
+        const confettiMode = document.getElementById('confettiMode');
+        const clownBackground = document.getElementById('clownBackground');
+        const honkSound = document.getElementById('honkSound');
+        const clownFact = document.getElementById('clownFact');
+        const toggleFacts = document.getElementById('toggleFacts');
+        const clownFacts = document.getElementById('clownFacts');
+        
+        let clownCount = 0;
+        let isRainbowMode = false;
+        let isConfettiMode = false;
+        
+        const clownFactsList = [
+            "The world record for most clowns in one place is 1,307!",
+            "The fear of clowns is called coulrophobia.",
+            "The first known clown was in ancient Egypt around 2500 BCE.",
+            "Clown noses are red because it's the first color to fade in low light.",
+            "The most famous clown, Ronald McDonald, is recognized by 96% of American children.",
+            "The word 'clown' comes from the Icelandic word 'klunni' meaning 'clumsy person'.",
+            "Joseph Grimaldi, the father of modern clowning, was so sad in real life that 'sad clown' became a trope.",
+            "The tradition of clowns wearing whiteface makeup dates back to the 1800s.",
+            "Clowns have their own language called 'clown lingo' or 'clownese'.",
+            "The world's smallest clown car record is held by a car that held 20 clowns!"
+        ];
+        
+        // Create clown emoji on click
+        document.addEventListener('click', (e) => {
+            if (e.target === honkButton || e.target === rainbowMode || e.target === confettiMode || 
+                e.target === toggleFacts || clownFacts.contains(e.target)) {
+                return;
+            }
+            
+            createClown(e.clientX, e.clientY);
+            
+            // Randomly play honk sound (30% chance)
+            if (Math.random() < 0.3) {
+                playHonk();
+            }
+            
+            // Randomly show a clown fact (10% chance)
+            if (Math.random() < 0.1) {
+                showRandomClownFact();
+            }
+        });
+        
+        // Create clown emoji at specific position
+        function createClown(x, y) {
+            const clown = document.createElement('div');
+            clown.className = 'clown-emoji';
+            clown.textContent = '🤡';
+            
+            // Random size between 20px and 60px
+            const size = 20 + Math.random() * 40;
+            clown.style.fontSize = `${size}px`;
+            
+            // Random rotation
+            const rotation = -30 + Math.random() * 60;
+            clown.style.transform = `rotate(${rotation}deg)`;
+            
+            // Position at click
+            clown.style.left = `${x - size/2}px`;
+            clown.style.top = `${y - size/2}px`;
+            
+            // Random animation duration
+            const duration = 2 + Math.random() * 4;
+            clown.style.animationDuration = `${duration}s`;
+            
+            // Add to container
+            clownContainer.appendChild(clown);
+            
+            // Remove after animation
+            setTimeout(() => {
+                clown.remove();
+            }, 3000);
+            
+            // Update counter
+            clownCount++;
+            clownCounter.textContent = clownCount;
+            
+            // Special effects at certain counts
+            if (clownCount === 10) {
+                showRandomClownFact();
+                clownFact.textContent = "You've created 10 clowns! Keep going! 🤡";
+            } else if (clownCount === 50) {
+                clownFact.textContent = "50 clowns! You're a clown wrangler now! 🤡🎪";
+                document.body.style.backgroundColor = '#fff0f5';
+            } else if (clownCount === 100) {
+                clownFact.textContent = "100 CLOWNS! 🤡🎉 You've officially started a circus!";
+                startConfetti();
+            }
+        }
+        
+        // Play honk sound
+        function playHonk() {
+            honkSound.currentTime = 0;
+            honkSound.play().catch(e => console.log("Honk failed:", e));
+        }
+        
+        // Show random clown fact
+        function showRandomClownFact() {
+            const fact = clownFactsList[Math.floor(Math.random() * clownFactsList.length)];
+            clownFact.textContent = `Did you know? ${fact}`;
+            clownFact.style.display = 'inline-block';
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                clownFact.style.display = 'none';
+            }, 7000);
+        }
+        
+        // Toggle rainbow mode
+        rainbowMode.addEventListener('click', () => {
+            isRainbowMode = !isRainbowMode;
+            
+            if (isRainbowMode) {
+                document.body.style.animation = 'rainbowBG 5s infinite';
+                document.body.style.background = 'linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000)';
+                document.body.style.backgroundSize = '800% 800%';
+                rainbowMode.style.background = '#9c27b0';
+                startConfetti();
+            } else {
+                document.body.style.animation = 'none';
+                document.body.style.background = '#ffebee';
+                rainbowMode.style.background = '#ff4081';
+            }
+        });
+        
+        // Toggle confetti mode
+        confettiMode.addEventListener('click', () => {
+            isConfettiMode = !isConfettiMode;
+            
+            if (isConfettiMode) {
+                startConfetti();
+                confettiMode.style.background = '#9c27b0';
+                setInterval(() => {
+                    if (isConfettiMode) startConfetti();
+                }, 3000);
+            } else {
+                confettiMode.style.background = '#ff4081';
+            }
+        });
+        
+        // Honk button
+        honkButton.addEventListener('click', () => {
+            playHonk();
+            
+            // Create multiple clowns
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    const x = Math.random() * window.innerWidth;
+                    const y = Math.random() * window.innerHeight;
+                    createClown(x, y);
+                }, i * 200);
+            }
+            
+            // Button animation
+            honkButton.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                honkButton.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    honkButton.style.transform = 'scale(1)';
+                }, 100);
+            }, 100);
+        });
+        
+        // Toggle clown facts
+        toggleFacts.addEventListener('click', () => {
+            clownFacts.style.display = clownFacts.style.display === 'block' ? 'none' : 'block';
+        });
+        
+        // Start confetti effect
+        function startConfetti() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'clown-emoji';
+                    confetti.textContent = Math.random() > 0.5 ? '🎉' : '✨';
+                    
+                    const size = 10 + Math.random() * 30;
+                    confetti.style.fontSize = `${size}px`;
+                    
+                    confetti.style.left = `${Math.random() * window.innerWidth}px`;
+                    confetti.style.top = `-50px`;
+                    
+                    // Random color
+                    confetti.style.color = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    // Random rotation
+                    const rotation = Math.random() * 360;
+                    confetti.style.transform = `rotate(${rotation}deg)`;
+                    
+                    // Random animation
+                    const duration = 2 + Math.random() * 3;
+                    confetti.style.animation = `float ${duration}s ease-out`;
+                    
+                    clownContainer.appendChild(confetti);
+                    
+                    // Remove after animation
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, duration * 1000);
+                }, i * 50);
+            }
+        }
+        
+        // Initial confetti
+        setTimeout(startConfetti, 1000);
+    </script>
+</body>
+</html>
