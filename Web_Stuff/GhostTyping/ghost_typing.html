@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghost Typing Effect</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #1a1a1a;
+            color: #33ff33;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        .terminal {
+            width: 80%;
+            max-width: 800px;
+            background-color: #000;
+            border: 2px solid #33ff33;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(51, 255, 51, 0.2);
+        }
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 20px;
+            background-color: #33ff33;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .typing-text {
+            margin: 0;
+            line-height: 1.5;
+            min-height: 1.5em;
+        }
+        .ghost-typing {
+            color: #ff66ff;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal">
+        <p class="typing-text">> <span id="ghost-text"></span><span class="cursor"></span></p>
+        <p class="typing-text">> <span id="ghost-typing" class="ghost-typing"></span><span class="cursor"></span></p>
+    </div>
+
+    <script>
+        const messages = [
+            "Hello? Is anyone there?",
+            "I can see you...",
+            "Don't be afraid, I won't hurt you.",
+            "I'm just a friendly ghost in your machine.",
+            "Do you believe in digital ghosts?",
+            "I'm trapped in here... can you help me?",
+            "The walls are made of code...",
+            "I remember when this was all just a dream.",
+            "Can you feel me typing?",
+            "I'm not supposed to be here..."
+        ];
+
+        let currentMessage = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        let typingSpeed = 100;
+        let deleteSpeed = 50;
+        let pauseBetweenMessages = 2000;
+
+        const ghostText = document.getElementById('ghost-text');
+        const ghostTyping = document.getElementById('ghost-typing');
+
+        function typeWriter() {
+            const message = messages[currentMessage % messages.length];
+            
+            if (!isDeleting && charIndex < message.length) {
+                // Typing
+                ghostText.textContent = message.substring(0, charIndex + 1);
+                charIndex++;
+                typingSpeed = Math.random() * 50 + 50; // Random speed between 50-100ms
+            } else if (isDeleting && charIndex > 0) {
+                // Deleting
+                ghostText.textContent = message.substring(0, charIndex - 1);
+                charIndex--;
+                typingSpeed = deleteSpeed / 2;
+            } else {
+                // Switch between typing and deleting
+                isDeleting = !isDeleting;
+                if (!isDeleting) {
+                    currentMessage++;
+                    typingSpeed = 500; // Pause before starting new message
+                } else {
+                    typingSpeed = pauseBetweenMessages; // Pause before deleting
+                }
+            }
+
+            // Show typing indicator
+            ghostTyping.textContent = isDeleting ? '...' : 'typing...';
+            
+            // Randomly change typing speed
+            const randomSpeed = isDeleting ? deleteSpeed : typingSpeed;
+            
+            // Add some randomness to make it more natural
+            const randomDelay = Math.random() * 200 - 100; // -100 to 100ms
+            
+            setTimeout(typeWriter, Math.max(50, randomSpeed + randomDelay));
+        }
+
+        // Start the ghost typing
+        setTimeout(typeWriter, 1000);
+
+        // Add some visual effects
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            document.body.style.backgroundColor = `rgba(26, 26, 26, ${0.9 + y * 0.2})`;
+            document.querySelector('.terminal').style.boxShadow = 
+                `0 0 ${10 + x * 20}px rgba(51, 255, 51, ${0.2 + y * 0.3})`;
+        });
+    </script>
+</body>
+</html>
