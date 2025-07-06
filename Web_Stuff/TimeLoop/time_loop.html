@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Time Loop</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: #000;
+            color: #0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            text-align: center;
+            transition: all 0.5s ease;
+        }
+        
+        .container {
+            max-width: 800px;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            position: relative;
+            animation: glitch 1s infinite;
+        }
+        
+        p {
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .countdown {
+            font-size: 5em;
+            font-weight: bold;
+            margin: 30px 0;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 10px #0f0;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #111;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: #0f0;
+            width: 0%;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 10px #0f0;
+        }
+        
+        .message {
+            margin-top: 30px;
+            padding: 15px;
+            border: 1px solid #0f0;
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+        
+        .message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        @keyframes glitch {
+            0% { text-shadow: 0.05em 0 0 #f00, -0.05em -0.025em 0 #0ff; }
+            14% { text-shadow: 0.05em 0 0 #f00, -0.05em -0.025em 0 #0ff; }
+            15% { text-shadow: -0.05em -0.025em 0 #f00, 0.025em 0.025em 0 #0ff; }
+            49% { text-shadow: -0.05em -0.025em 0 #f00, 0.025em 0.025em 0 #0ff; }
+            50% { text-shadow: 0.025em 0.05em 0 #f00, 0.05em 0 0 #0ff, 0 -0.05em 0 #f00; }
+            99% { text-shadow: 0.025em 0.05em 0 #f00, 0.05em 0 0 #0ff, 0 -0.05em 0 #f00; }
+            100% { text-shadow: -0.025em 0 0 #f00, -0.025em -0.025em 0 #0ff; }
+        }
+        
+        .glitch {
+            animation: glitch 1s infinite;
+        }
+        
+        .matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.2;
+        }
+        
+        .restart-btn {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 10px 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .restart-btn.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .restart-btn:hover {
+            background: #0c0;
+            box-shadow: 0 0 20px #0f0;
+        }
+        
+        .restart-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .restart-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .restart-btn:hover::before {
+            left: 100%;
+        }
+        
+        .version {
+            position: fixed;
+            bottom: 10px;
+            right: 15px;
+            font-size: 0.8em;
+            color: #0a0;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix" class="matrix-rain"></canvas>
+    
+    <div class="container">
+        <h1 id="title">Time Loop v1.0</h1>
+        <p id="subtitle">Experience the endless cycle of time...</p>
+        
+        <div class="countdown" id="countdown">00:10</div>
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+        
+        <p id="status">Initializing time loop sequence...</p>
+        
+        <div class="message" id="message">
+            Time loop initiated. Brace yourself for the inevitable.
+        </div>
+        
+        <button class="restart-btn" id="restartBtn">Break the Loop</button>
+    </div>
+    
+    <div class="version" id="version">v1.0.0</div>
+    
+    <script>
+        // Matrix rain effect
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+        const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const nums = '0123456789';
+        const alphabet = katakana + latin + nums;
+        
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        
+        const rainDrops = [];
+        for (let i = 0; i < columns; i++) {
+            rainDrops[i] = 1;
+        }
+        
+        function draw() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#0f0';
+            ctx.font = fontSize + 'px monospace';
+            
+            for (let i = 0; i < rainDrops.length; i++) {
+                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+                
+                if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    rainDrops[i] = 0;
+                }
+                rainDrops[i]++;
+            }
+        }
+        
+        // Time loop functionality
+        let timeLeft = 10; // 10 seconds
+        let loopCount = 0;
+        let loopInterval;
+        let progressInterval;
+        let isPaused = false;
+        
+        const countdownElement = document.getElementById('countdown');
+        const progressElement = document.getElementById('progress');
+        const statusElement = document.getElementById('status');
+        const messageElement = document.getElementById('message');
+        const restartButton = document.getElementById('restartBtn');
+        const titleElement = document.getElementById('title');
+        const subtitleElement = document.getElementById('subtitle');
+        const versionElement = document.getElementById('version');
+        
+        const messages = [
+            "Initializing temporal displacement...",
+            "Synchronizing chronal particles...",
+            "Calibrating time loop parameters...",
+            "Warning: Temporal anomaly detected!",
+            "Stabilizing time stream...",
+            "Loop integrity at 98.7%...",
+            "Preparing for next iteration...",
+            "Temporal coordinates locked...",
+            "Initiating countdown sequence...",
+            "Brace for temporal displacement!"
+        ];
+        
+        const glitchMessages = [
+            "ERROR: Temporal paradox detected!",
+            "WARNING: Loop instability increasing!",
+            "CRITICAL: Chronal breach imminent!",
+            "SYSTEM FAILURE: Time stream collapsing!",
+            "FATAL ERROR: Cannot escape loop!"
+        ];
+        
+        function startLoop() {
+            timeLeft = 10;
+            loopCount++;
+            updateCountdown();
+            
+            // Update version with loop count
+            versionElement.textContent = `v1.0.${loopCount}`;
+            
+            // Random status message
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            statusElement.textContent = randomMessage;
+            
+            // Show message with delay
+            setTimeout(() => {
+                messageElement.textContent = `Time loop #${loopCount} initiated.`;
+                messageElement.classList.add('show');
+                
+                // Hide message after delay
+                setTimeout(() => {
+                    messageElement.classList.remove('show');
+                }, 2000);
+            }, 1500);
+            
+            // Start progress bar
+            progressElement.style.width = '0%';
+            const progressStep = 100 / (timeLeft * 10);
+            
+            progressInterval = setInterval(() => {
+                if (!isPaused) {
+                    const currentWidth = parseFloat(progressElement.style.width) || 0;
+                    progressElement.style.width = (currentWidth + progressStep) + '%';
+                }
+            }, 100);
+            
+            // Start countdown
+            loopInterval = setInterval(updateCountdown, 1000);
+        }
+        
+        function updateCountdown() {
+            if (isPaused) return;
+            
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            
+            countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Glitch effect when time is running out
+            if (timeLeft <= 3) {
+                countdownElement.classList.add('glitch');
+                
+                // Random glitch message
+                if (Math.random() > 0.7) {
+                    const glitchMessage = glitchMessages[Math.floor(Math.random() * glitchMessages.length)];
+                    statusElement.textContent = glitchMessage;
+                }
+            } else {
+                countdownElement.classList.remove('glitch');
+            }
+            
+            if (timeLeft <= 0) {
+                clearInterval(loopInterval);
+                clearInterval(progressInterval);
+                
+                // Show restart button with delay
+                setTimeout(() => {
+                    restartButton.classList.add('show');
+                }, 1000);
+                
+                // Auto-restart after delay
+                setTimeout(() => {
+                    if (!isPaused) {
+                        restartLoop();
+                    }
+                }, 5000);
+                
+                return;
+            }
+            
+            timeLeft--;
+        }
+        
+        function restartLoop() {
+            clearInterval(loopInterval);
+            clearInterval(progressInterval);
+            restartButton.classList.remove('show');
+            startLoop();
+        }
+        
+        // Event listeners
+        restartButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            restartLoop();
+        });
+        
+        // Pause on spacebar
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                isPaused = !isPaused;
+                
+                if (isPaused) {
+                    statusElement.textContent = 'Time loop PAUSED';
+                    messageElement.textContent = 'Press SPACE to resume...';
+                    messageElement.classList.add('show');
+                } else {
+                    statusElement.textContent = 'Resuming time loop...';
+                    messageElement.classList.remove('show');
+                }
+            }
+        });
+        
+        // Start the loop
+        startLoop();
+        
+        // Start matrix animation
+        setInterval(draw, 30);
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        
+        // Easter egg: change title on click
+        titleElement.addEventListener('click', () => {
+            const originalText = titleElement.textContent;
+            titleElement.textContent = 'TIME IS AN ILLUSION';
+            
+            setTimeout(() => {
+                titleElement.textContent = originalText;
+            }, 2000);
+        });
+        
+        // Easter egg: change subtitle on hover
+        subtitleElement.addEventListener('mouseover', () => {
+            const originalText = subtitleElement.textContent;
+            subtitleElement.textContent = 'You can\'t escape...';
+            
+            setTimeout(() => {
+                subtitleElement.textContent = originalText;
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

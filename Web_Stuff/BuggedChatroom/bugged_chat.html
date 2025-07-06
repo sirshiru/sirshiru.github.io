@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bugged Chatroom</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #33ff33;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chat-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 5px;
+            max-width: 80%;
+            position: relative;
+            animation: glitch 0.2s infinite;
+        }
+        
+        .user-message {
+            align-self: flex-end;
+            background: #006600;
+            color: #ffffff;
+            margin-left: 20%;
+        }
+        
+        .other-message {
+            align-self: flex-start;
+            background: #003300;
+            color: #88ff88;
+            margin-right: 20%;
+        }
+        
+        .typing-indicator {
+            align-self: flex-start;
+            background: #222;
+            color: #666;
+            padding: 10px 15px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-bottom: 15px;
+            max-width: 80%;
+        }
+        
+        .input-container {
+            padding: 15px;
+            background: #111;
+            display: flex;
+            border-top: 1px solid #333;
+        }
+        
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            background: #222;
+            border: 1px solid #333;
+            color: #33ff33;
+            border-radius: 3px 0 0 3px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background: #006600;
+            color: white;
+            border: none;
+            border-radius: 0 3px 3px 0;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background: #008800;
+        }
+        
+        .username {
+            font-weight: bold;
+            margin-bottom: 3px;
+            font-size: 0.9em;
+        }
+        
+        .time {
+            font-size: 0.7em;
+            color: #666;
+            text-align: right;
+            margin-top: 3px;
+        }
+        
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-1px, 1px); }
+            40% { transform: translate(-1px, -1px); }
+            60% { transform: translate(1px, 1px); }
+            80% { transform: translate(1px, -1px); }
+            100% { transform: translate(0); }
+        }
+        
+        .corrupted {
+            animation: glitch 0.1s infinite, colorChange 0.5s infinite;
+        }
+        
+        @keyframes colorChange {
+            0% { color: #33ff33; }
+            50% { color: #ff3333; }
+            100% { color: #3333ff; }
+        }
+        
+        .glitch-char {
+            display: inline-block;
+            position: relative;
+        }
+        
+        .glitch-char::before,
+        .glitch-char::after {
+            content: attr(data-char);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+        }
+        
+        .glitch-char::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff00ff;
+            clip: rect(24px, 550px, 90px, 0);
+            animation: glitch-anim-1 2s infinite linear alternate-reverse;
+        }
+        
+        .glitch-char::after {
+            left: -2px;
+            text-shadow: 2px 0 #00ffff;
+            clip: rect(85px, 550px, 140px, 0);
+            animation: glitch-anim-2 2s infinite linear alternate-reverse;
+        }
+        
+        @keyframes glitch-anim-1 {
+            0% { clip: rect(32px, 9999px, 9999px, 0); }
+            20% { clip: rect(128px, 9999px, 9999px, 0); }
+            40% { clip: rect(51px, 9999px, 9999px, 0); }
+            60% { clip: rect(78px, 9999px, 9999px, 0); }
+            80% { clip: rect(42px, 9999px, 9999px, 0); }
+            100% { clip: rect(92px, 9999px, 9999px, 0); }
+        }
+        
+        @keyframes glitch-anim-2 {
+            0% { clip: rect(94px, 9999px, 76px, 0); }
+            20% { clip: rect(63px, 9999px, 19px, 0); }
+            40% { clip: rect(112px, 9999px, 67px, 0); }
+            60% { clip: rect(21px, 9999px, 6px, 0); }
+            80% { clip: rect(58px, 9999px, 103px, 0); }
+            100% { clip: rect(2px, 9999px, 97px, 0); }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #33ff33;
+            padding: 10px 15px;
+            border: 1px solid #33ff33;
+            border-radius: 5px;
+            display: none;
+            z-index: 1000;
+        }
+        
+        .typing-dots {
+            display: inline-block;
+            position: relative;
+            width: 40px;
+            height: 10px;
+        }
+        
+        .typing-dots span {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #666;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dots span:nth-child(1) { left: 0; animation-delay: 0s; }
+        .typing-dots span:nth-child(2) { left: 12px; animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { left: 24px; animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="notification" id="notification">
+        New message received!
+    </div>
+    
+    <div class="chat-container" id="chatContainer">
+        <div class="message other-message">
+            <div class="username">System</div>
+            <div class="content">Welcome to Bugged Chatroom v1.0.3</div>
+            <div class="time">Just now</div>
+        </div>
+        <div class="message other-message">
+            <div class="username">System</div>
+            <div class="content">Warning: This chat client is known to have transmission issues. Messages may be corrupted.</div>
+            <div class="time">Just now</div>
+        </div>
+        <div class="message other-message">
+            <div class="username">Admin</div>
+            <div class="content">Hello! Welcome to the chat. Don't mind the glitches, they're... uh... features.</div>
+            <div class="time">Just now</div>
+        </div>
+    </div>
+    
+    <div class="typing-indicator" id="typingIndicator" style="display: none;">
+        <div class="typing-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <span>Someone is typing</span>
+    </div>
+    
+    <div class="input-container">
+        <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off">
+        <button id="sendButton">Send</button>
+    </div>
+    
+    <script>
+        const chatContainer = document.getElementById('chatContainer');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const notification = document.getElementById('notification');
+        
+        // List of possible usernames
+        const usernames = [
+            'GlitchMaster', 'ByteNinja', 'BugHunter', 'CodeWizard', 'PixelPirate',
+            'SyntaxError', 'NullPointer', 'StackOverflow', 'SegFault', 'BlueScreen',
+            '404_User', '500_Internal', 'NaN_Lover', 'Undefined_User', 'TypeError'
+        ];
+        
+        // List of possible messages
+        const botMessages = [
+            "Did you see that glitch?",
+            "I think the server is acting up again...",
+            "Your message was corrupted, can you repeat that?",
+            "I'm getting some serious deja vu here.",
+            "404: Message not found.",
+            "Have you tried turning it off and on again?",
+            "I'm not a robot, I promise. Beep boop.",
+            "The matrix has you...",
+            "This is fine. Everything is fine.",
+            "I think we're being watched..."
+        ];
+        
+        // Corrupt text with glitches
+        function corruptText(text, corruptionLevel = 0.1) {
+            if (Math.random() > corruptionLevel) return text;
+            
+            const chars = '!@#$%^&*()_+-=[]\{}|;\':",./<>?~`';
+            let result = '';
+            
+            for (let i = 0; i < text.length; i++) {
+                if (Math.random() < 0.1) {
+                    // Replace with random character
+                    result += chars.charAt(Math.floor(Math.random() * chars.length));
+                } else if (Math.random() < 0.05) {
+                    // Duplicate character
+                    result += text.charAt(i) + text.charAt(i);
+                } else if (Math.random() < 0.05) {
+                    // Skip character
+                    continue;
+                } else {
+                    // Keep original character
+                    result += text.charAt(i);
+                }
+            }
+            
+            return result || text; // Ensure we don't return empty string
+        }
+        
+        // Add glitch effect to text
+        function addGlitchEffect(element) {
+            const text = element.textContent;
+            element.innerHTML = '';
+            
+            for (let i = 0; i < text.length; i++) {
+                const span = document.createElement('span');
+                span.className = 'glitch-char';
+                span.textContent = text.charAt(i);
+                span.setAttribute('data-char', text.charAt(i));
+                
+                if (Math.random() < 0.3) {
+                    span.classList.add('corrupted');
+                }
+                
+                element.appendChild(span);
+            }
+        }
+        
+        // Add a message to the chat
+        function addMessage(sender, message, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'other-message'}`;
+            
+            const usernameDiv = document.createElement('div');
+            usernameDiv.className = 'username';
+            usernameDiv.textContent = sender;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'content';
+            contentDiv.textContent = message;
+            
+            // Add glitch effect to some messages
+            if (!isUser && Math.random() > 0.3) {
+                contentDiv.textContent = corruptText(message);
+            }
+            
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'time';
+            timeDiv.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            messageDiv.appendChild(usernameDiv);
+            messageDiv.appendChild(contentDiv);
+            messageDiv.appendChild(timeDiv);
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            // Show notification for new messages (except user's own)
+            if (!isUser) {
+                showNotification(`${sender}: ${message.substring(0, 20)}${message.length > 20 ? '...' : ''}`);
+            }
+            
+            return messageDiv;
+        }
+        
+        // Show notification
+        function showNotification(text) {
+            notification.textContent = text;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Simulate typing
+        function simulateTyping() {
+            typingIndicator.style.display = 'block';
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    typingIndicator.style.display = 'none';
+                    resolve();
+                }, Math.random() * 2000 + 1000);
+            });
+        }
+        
+        // Send a message
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+            
+            // Add user message
+            addMessage('You', message, true);
+            messageInput.value = '';
+            
+            // Simulate bot response after a delay
+            setTimeout(async () => {
+                await simulateTyping();
+                
+                const randomUsername = usernames[Math.floor(Math.random() * usernames.length)];
+                const randomMessage = botMessages[Math.floor(Math.random() * botMessages.length)];
+                
+                addMessage(randomUsername, randomMessage);
+                
+                // Randomly trigger additional bot messages
+                if (Math.random() > 0.7) {
+                    setTimeout(async () => {
+                        await simulateTyping();
+                        const anotherMessage = botMessages[Math.floor(Math.random() * botMessages.length)];
+                        addMessage(randomUsername, anotherMessage);
+                    }, Math.random() * 2000 + 1000);
+                }
+            }, Math.random() * 2000 + 1000);
+        }
+        
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // Initial bot message
+        setTimeout(() => {
+            addMessage('System', `${usernames[0]} has joined the chat`);
+            
+            setTimeout(async () => {
+                await simulateTyping();
+                addMessage(usernames[0], "Hey everyone, how's it going?");
+            }, 1000);
+        }, 2000);
+        
+        // Random glitch effect on the whole chat
+        setInterval(() => {
+            if (Math.random() > 0.9) {
+                document.body.classList.add('corrupted');
+                setTimeout(() => {
+                    document.body.classList.remove('corrupted');
+                }, 100);
+            }
+        }, 5000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Someone is Typing...</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .chat-container {
+            width: 350px;
+            height: 600px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            padding: 15px;
+            background: #075e54;
+            color: white;
+            display: flex;
+            align-items: center;
+        }
+        
+        .back-arrow {
+            font-size: 20px;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+        
+        .user-info {
+            flex: 1;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            margin: 0;
+            font-size: 16px;
+        }
+        
+        .status {
+            font-size: 12px;
+            opacity: 0.8;
+            margin: 2px 0 0;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #e5ddd5;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .typing-indicator {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 18px;
+            align-self: flex-start;
+            margin: 5px 0;
+            max-width: 200px;
+            box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .typing-dots {
+            display: flex;
+            align-items: center;
+            height: 20px;
+        }
+        
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: #9e9e9e;
+            border-radius: 50%;
+            margin: 0 2px;
+            opacity: 0.7;
+        }
+        
+        .dot:nth-child(1) {
+            animation: typing 1.4s infinite;
+        }
+        
+        .dot:nth-child(2) {
+            animation: typing 1.4s infinite 0.2s;
+        }
+        
+        .dot:nth-child(3) {
+            animation: typing 1.4s infinite 0.4s;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.7;
+            }
+            30% {
+                transform: translateY(-5px);
+                opacity: 1;
+            }
+        }
+        
+        .typing-text {
+            font-size: 14px;
+            color: #555;
+            margin-left: 5px;
+        }
+        
+        .chat-input {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #e9e9e9;
+            display: flex;
+            align-items: center;
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #e9e9e9;
+            border-radius: 20px;
+            outline: none;
+            font-size: 14px;
+        }
+        
+        .send-button {
+            background: #075e54;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-left: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .typing-status {
+            font-size: 12px;
+            color: #666;
+            padding: 5px 15px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="back-arrow">←</div>
+            <div class="user-info">
+                <h2 class="user-name">Mystery User</h2>
+                <p class="status">typing...</p>
+            </div>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="typing-status" id="typingStatus">Mystery User is typing...</div>
+            <div class="typing-indicator">
+                <div class="typing-dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-input">
+            <input type="text" class="message-input" placeholder="Type a message..." id="messageInput">
+            <button class="send-button" id="sendButton">↑</button>
+        </div>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingStatus = document.getElementById('typingStatus');
+        
+        // List of possible typing messages
+        const typingMessages = [
+            "is thinking...",
+            "is typing...",
+            "is writing a novel...",
+            "is crafting a message...",
+            "is still here...",
+            "hasn't left yet...",
+            "is taking their time...",
+            "is typing very slowly..."
+        ];
+        
+        // Function to update typing status
+        function updateTypingStatus() {
+            const randomMessage = typingMessages[Math.floor(Math.random() * typingMessages.length)];
+            typingStatus.textContent = `Mystery User ${randomMessage}`;
+            
+            // Randomly change the status message
+            const randomTime = Math.random() * 5000 + 2000; // Between 2-7 seconds
+            setTimeout(updateTypingStatus, randomTime);
+        }
+        
+        // Start the typing status updates
+        updateTypingStatus();
+        
+        // Prevent form submission
+        document.querySelector('form')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+        });
+        
+        // Make the send button do nothing
+        sendButton.addEventListener('click', () => {
+            messageInput.value = '';
+        });
+        
+        // Prevent input from doing anything
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                messageInput.value = '';
+            }
+        });
+        
+        // Add some fake messages occasionally
+        function addFakeMessage() {
+            const messages = [
+                "Hello?",
+                "Are you still there?",
+                "...",
+                "I can see you",
+                "Why aren't you responding?",
+                "Don't ignore me",
+                "I know you're there",
+                "This is getting awkward",
+                "Fine, I'll stop"
+            ];
+            
+            const randomTime = Math.random() * 10000 + 5000; // 5-15 seconds
+            setTimeout(() => {
+                const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+                
+                // Remove typing indicator
+                const typingIndicator = document.querySelector('.typing-indicator');
+                if (typingIndicator) {
+                    typingIndicator.style.display = 'none';
+                }
+                
+                // Add message
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'typing-indicator';
+                messageDiv.textContent = randomMessage;
+                chatMessages.insertBefore(messageDiv, typingStatus.nextSibling);
+                
+                // Show typing indicator again after a delay
+                setTimeout(() => {
+                    if (typingIndicator) {
+                        typingIndicator.style.display = 'flex';
+                    }
+                    
+                    // Schedule next message
+                    addFakeMessage();
+                }, 2000);
+                
+            }, randomTime);
+        }
+        
+        // Start the fake messaging
+        addFakeMessage();
+        
+        // Make the back button go back
+        document.querySelector('.back-arrow').addEventListener('click', () => {
+            window.history.back();
+        });
+    </script>
+</body>
+</html>
