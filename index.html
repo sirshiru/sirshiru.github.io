@@ -240,6 +240,72 @@
             transform: translateX(3px);
         }
         
+        /* New styles for Jokers table */
+        .jokers-section {
+            padding: 4rem 0;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .jokers-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: var(--dark);
+            font-weight: 700;
+            text-align: center;
+        }
+        
+        .jokers-table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            overflow-x: auto;
+            border: 1px solid var(--gray-200);
+            margin: 0 1rem;
+        }
+        
+        .jokers-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+        
+        .jokers-table th, .jokers-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .jokers-table th {
+            background: var(--gray-100);
+            color: var(--dark);
+            font-weight: 600;
+        }
+        
+        .jokers-table tr:hover {
+            background: var(--gray-100);
+        }
+        
+        .jokers-table .rarity-common { color: #16a34a; }
+        .jokers-table .rarity-uncommon { color: #d97706; }
+        .jokers-table .rarity-rare { color: #dc2626; }
+        .jokers-table .rarity-legendary { color: #7c3aed; font-weight: 600; }
+        
+        .jokers-notes {
+            margin: 2rem 1rem;
+            color: var(--gray-600);
+            line-height: 1.7;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .jokers-notes h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+        
         footer {
             background: var(--dark);
             color: #94a3b8;
@@ -292,6 +358,18 @@
                 max-width: 400px;
                 margin: 0 auto;
             }
+            
+            .jokers-section h2 {
+                font-size: 2rem;
+            }
+            
+            .jokers-table {
+                font-size: 0.85rem;
+            }
+            
+            .jokers-table th, .jokers-table td {
+                padding: 0.75rem;
+            }
         }
         
         @media (max-width: 480px) {
@@ -307,6 +385,14 @@
             .project-content {
                 padding: 1.5rem;
             }
+            
+            .jokers-table {
+                font-size: 0.8rem;
+            }
+            
+            .jokers-table th, .jokers-table td {
+                padding: 0.5rem;
+            }
         }
     </style>
 </head>
@@ -320,6 +406,20 @@
     
     <main>
         <div class="projects-grid">
+            <!-- Balatro Chip Calculator Card -->
+            <a href="https://sirshiru.github.io/balatro-calculator/" class="project-card" target="_blank" rel="noopener noreferrer">
+                <div class="project-image" style="font-size:2.5rem;">
+                    <span>🃏</span>
+                </div>
+                <div class="project-content">
+                    <h3 class="project-title">Balatro Chip Calculator</h3>
+                    <p class="project-description">
+                        A pixel-art calculator for real-life Balatro, with full hand scoring, multipliers, and Joker effects. Designed for fast, phone-friendly play at the table!
+                    </p>
+                    <span class="btn">Try Calculator <i>→</i></span>
+                </div>
+            </a>
+            <!-- Existing Projects -->
             <a href="https://sirshiru.github.io/web-gallery/" class="project-card" target="_blank" rel="noopener noreferrer">
                 <div class="project-image">
                     <span>🎨</span>
@@ -330,7 +430,6 @@
                     <span class="btn">Explore Gallery <i>→</i></span>
                 </div>
             </a>
-            
             <a href="https://sirshiru.github.io/grade-calculator/" class="project-card" target="_blank" rel="noopener noreferrer">
                 <div class="project-image">
                     <span>📚</span>
@@ -341,18 +440,280 @@
                     <span class="btn">Try Calculator <i>→</i></span>
                 </div>
             </a>
-<a href="https://sirshiru.github.io/recipe-maker/" class="project-card" target="_blank" rel="noopener noreferrer">
-    <div class="project-image">
-        <span>🍲</span>
-    </div>
-    <div class="project-content">
-        <h3 class="project-title">Recipe Maker</h3>
-        <p class="project-description">Create your own random or customizable recipes with this generator. Great for chaotic cooking, snack inspiration, or food-based fun.</p>
-        <span class="btn">Cook Something <i>→</i></span>
-    </div>
-</a>
-
+            <a href="https://sirshiru.github.io/recipe-maker/" class="project-card" target="_blank" rel="noopener noreferrer">
+                <div class="project-image">
+                    <span>🍲</span>
+                </div>
+                <div class="project-content">
+                    <h3 class="project-title">Recipe Maker</h3>
+                    <p class="project-description">Create your own random or customizable recipes with this generator. Great for chaotic cooking, snack inspiration, or food-based fun.</p>
+                    <span class="btn">Cook Something <i>→</i></span>
+                </div>
+            </a>
         </div>
+        
+        <!-- Jokers Table Section -->
+        <section class="jokers-section">
+            <h2>Balatro IRL Jokers</h2>
+            <div class="jokers-table-container">
+                <table class="jokers-table">
+                    <thead>
+                        <tr>
+                            <th>Joker Name</th>
+                            <th>Effect</th>
+                            <th>Rarity</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Seal of Approval</td>
+                            <td>Adds +50% chips and mult of all other Jokers, max +200 chips/mult</td>
+                            <td class="rarity-legendary">Legendary</td>
+                            <td>Strong but capped to prevent runaway scaling</td>
+                        </tr>
+                        <tr>
+                            <td>Lucky Cat</td>
+                            <td>+1 mult per Pair played this run (resets per round)</td>
+                            <td class="rarity-common">Common</td>
+                            <td>Steady scaling, rewards consistent Pair plays</td>
+                        </tr>
+                        <tr>
+                            <td>Oily Joker</td>
+                            <td>10% chance to duplicate a hand card, 5% chance to lose a random Joker</td>
+                            <td class="rarity-rare">Rare</td>
+                            <td>High risk/reward, encourages bold plays</td>
+                        </tr>
+                        <tr>
+                            <td>Echo Joker</td>
+                            <td>Repeats previous hand for 50% chips (once per round)</td>
+                            <td class="rarity-uncommon">Uncommon</td>
+                            <td>Strategic combo potential, plan your hands</td>
+                        </tr>
+                        <tr>
+                            <td>Ace of Pain</td>
+                            <td>+15 chips per Ace in hand</td>
+                            <td class="rarity-common">Common</td>
+                            <td>Reliable for Ace-focused decks, slightly nerfed for balance</td>
+                        </tr>
+                        <tr>
+                            <td>The Collector</td>
+                            <td>+20 chips per unique hand type played this run (resets per game)</td>
+                            <td class="rarity-rare">Rare</td>
+                            <td>Encourages hand variety, nerfed to avoid excess chip gain</td>
+                        </tr>
+                        <tr>
+                            <td>Cheat Sheet</td>
+                            <td>Sets mult to 5 if no other Jokers triggered this round</td>
+                            <td class="rarity-common">Common</td>
+                            <td>Solid early-game option, situational later</td>
+                        </tr>
+                        <tr>
+                            <td>Stack Overflow</td>
+                            <td>Mult = hand size × 2 (max 10 mult)</td>
+                            <td class="rarity-uncommon">Uncommon</td>
+                            <td>Strong with big hands, capped to prevent exponential scaling</td>
+                        </tr>
+                        <tr>
+                            <td>Static Channel</td>
+                            <td>All hands gain +0.5 xmult flat</td>
+                            <td class="rarity-common">Common</td>
+                            <td>Consistent boost, halved for balance</td>
+                        </tr>
+                        <tr>
+                            <td>Lucky Bounce</td>
+                            <td>20% chance to double chips for a hand (roll a d10: 1-2 triggers)</td>
+                            <td class="rarity-rare">Rare</td>
+                            <td>High variance, gambler’s delight</td>
+                        </tr>
+                        <tr>
+                            <td>Foggy Mirror</td>
+                            <td>Copies a random Joker’s effect each round (excludes Legendary)</td>
+                            <td class="rarity-rare">Rare</td>
+                            <td>Versatile but unpredictable, excludes OP Jokers</td>
+                        </tr>
+                        <tr>
+                            <td>Duct Tape</td>
+                            <td>Adds weakest Joker’s mult to strongest (max +5 mult)</td>
+                            <td class="rarity-uncommon">Uncommon</td>
+                            <td>Buffs weak builds, capped for balance</td>
+                        </tr>
+                        <tr>
+                            <td>The Archivist</td>
+                            <td>+75 chips per unique suit in deck</td>
+                            <td class="rarity-common">Common</td>
+                            <td>Encourages suit diversity, slightly nerfed</td>
+                        </tr>
+                        <tr>
+                            <td>Rotten Card</td>
+                            <td>-1 mult, +200 chips per hand</td>
+                            <td class="rarity-common">Common</td>
+                            <td>Tradeoff card, buffed chips to make it viable</td>
+                        </tr>
+                        <tr>
+                            <td>Forbidden Joker</td>
+                            <td>If your only Joker, ×5 chips; otherwise, no effect</td>
+                            <td class="rarity-legendary">Legendary</td>
+                            <td>High-risk, high-reward for one-Joker builds</td>
+                        </tr>
+                        <tr>
+                            <td>Heartbeat</td>
+                            <td>+2 xmult if Flush or Full House played</td>
+                            <td class="rarity-common">Common</td>
+                            <td>Strong synergy with suit-based hands</td>
+                        </tr>
+                        <tr>
+                            <td>Glitch Joker</td>
+                            <td>Re-rolls hand before scoring (must use result, once per round)</td>
+                            <td class="rarity-rare">Rare</td>
+                            <td>Chaotic but fun, limited to once per round</td>
+                        </tr>
+                        <tr>
+                            <td>The Recruiter</td>
+                            <td>+50 chips per Joker in deck</td>
+                            <td class="rarity-common">Common</td>
+                            <td>Rewards Joker-heavy builds, slightly nerfed</td>
+                        </tr>
+                        <tr>
+                            <td>Pacifist</td>
+                            <td>+3 mult if you skip a hand voluntarily (once per round)</td>
+                            <td class="rarity-uncommon">Uncommon</td>
+                            <td>Strategic skipping, limited to prevent spamming</td>
+                        </tr>
+                        <tr>
+                            <td>Broken Clock</td>
+                            <td>Every 2nd round: +300 chips (tracks rounds with a counter)</td>
+                            <td class="rarity-common">Common</td>
+                            <td>Balanced burst, easy to track in IRL play</td>
+                        </tr>
+                        <tr>
+                            <td>Jester’s Mirror</td>
+                            <td>Chips gained this hand are added as mult next hand</td>
+                            <td class="rarity-rare">Rare</td>
+                            <td>Combo-focused, rewards high-chip hands</td>
+                        </tr>
+                        <tr>
+                            <td>Wild Card</td>
+                            <td>Counts as a random Joker each round (excludes Legendary)</td>
+                            <td class="rarity-rare">Rare</td>
+                            <td>Versatile but unstable, excludes OP Jokers</td>
+                        </tr>
+                        <tr>
+                            <td>Sleepy Joker</td>
+                            <td>Inactive for 3 rounds, then +6 xmult permanently</td>
+                            <td class="rarity-rare">Rare</td>
+                            <td>Slow payoff, nerfed to balance late-game power</td>
+                        </tr>
+                        <tr>
+                            <td>Heat Sink</td>
+                            <td>-1 mult, prevents Joker destruction (applies to this Joker only)</td>
+                            <td class="rarity-uncommon">Uncommon</td>
+                            <td>Safety net for Joker-loss effects, specific to itself</td>
+                        </tr>
+                        <tr>
+                            <td>Energy Drink</td>
+                            <td>+1 hand this round (max 1 extra hand)</td>
+                            <td class="rarity-common">Common</td>
+                            <td>Tempo boost, limited to prevent overuse</td>
+                        </tr>
+                        <tr>
+                            <td>Monopoly Man</td>
+                            <td>+40 chips per card in deck costing 5+</td>
+                            <td class="rarity-common">Common</td>
+                            <td>Synergizes with high-cost cards, slightly nerfed</td>
+                        </tr>
+                        <tr>
+                            <td>Card Shark</td>
+                            <td>+2 xmult if Straight or Straight Flush played</td>
+                            <td class="rarity-common">Common</td>
+                            <td>Reliable for Straight builds, good synergy</td>
+                        </tr>
+                        <tr>
+                            <td>Mirrorball</td>
+                            <td>+1 chip per Joker per card in hand</td>
+                            <td class="rarity-uncommon">Uncommon</td>
+                            <td>Scales with Joker count and hand size, great for big hands</td>
+                        </tr>
+                        <tr>
+                            <td>Cosmic Dealer</td>
+                            <td>+10 chips per planet card in deck</td>
+                            <td class="rarity-common">Common</td>
+                            <td>Encourages planet card use, simple and thematic</td>
+                        </tr>
+                        <tr>
+                            <td>Discard Dynamo</td>
+                            <td>+2 mult per card discarded this round (resets per round)</td>
+                            <td class="rarity-uncommon">Uncommon</td>
+                            <td>Rewards discard-heavy strategies</td>
+                        </tr>
+                        <tr>
+                            <td>Suit Savant</td>
+                            <td>+25 chips if all cards in hand are the same suit</td>
+                            <td class="rarity-common">Common</td>
+                            <td>Boosts Flush builds, easy to track</td>
+                        </tr>
+                        <tr>
+                            <td>Overclocker</td>
+                            <td>+1 xmult if you play 3+ hands this round (tracks hand count)</td>
+                            <td class="rarity-uncommon">Uncommon</td>
+                            <td>Rewards fast play, requires tracking</td>
+                        </tr>
+                        <tr>
+                            <td>Phantom Joker</td>
+                            <td>15% chance to ignore hand scoring (roll a d10: 1 triggers)</td>
+                            <td class="rarity-rare">Rare</td>
+                            <td>Risky, can save a bad hand but unpredictable</td>
+                        </tr>
+                        <tr>
+                            <td>Card Counter</td>
+                            <td>+5 chips per card played this run (resets per game)</td>
+                            <td class="rarity-common">Common</td>
+                            <td>Scales with play volume, encourages active play</td>
+                        </tr>
+                        <tr>
+                            <td>Golden Ticket</td>
+                            <td>+100 chips if you score exactly 100 chips in a hand</td>
+                            <td class="rarity-rare">Rare</td>
+                            <td>Precise but rewarding, encourages strategic hand-building</td>
+                        </tr>
+                        <tr>
+                            <td>Chaos Engine</td>
+                            <td>Randomly doubles or halves chips each hand (50% chance each)</td>
+                            <td class="rarity-rare">Rare</td>
+                            <td>Pure chaos, high variance for risk-takers</td>
+                        </tr>
+                        <tr>
+                            <td>Suit Amplifier</td>
+                            <td>+1 xmult per unique suit in hand</td>
+                            <td class="rarity-uncommon">Uncommon</td>
+                            <td>Rewards mixed-suit hands, encourages diversity</td>
+                        </tr>
+                        <tr>
+                            <td>Time Warp</td>
+                            <td>+50 chips if you play the same hand type twice in a row</td>
+                            <td class="rarity-common">Common</td>
+                            <td>Rewards consistency, easy to track</td>
+                        </tr>
+                        <tr>
+                            <td>Quantum Joker</td>
+                            <td>+3 xmult if you have exactly 3 Jokers in deck</td>
+                            <td class="rarity-rare">Rare</td>
+                            <td>Niche but powerful, encourages specific builds</td>
+                        </tr>
+                        <tr>
+                            <td>Final Gambit</td>
+                            <td>If this is your last Joker, +200 chips and +5 mult</td>
+                            <td class="rarity-legendary">Legendary</td>
+                            <td>High reward for risky single-Joker endgame</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="jokers-notes">
+                <h3>Notes for IRL Play</h3>
+                <p>Use counters (e.g., coins, tokens) for effects that stack or reset (e.g., Lucky Cat, The Collector). For percentage-based effects (e.g., Lucky Bounce, Phantom Joker), use a d10 die for simplicity. Effects are tuned to avoid runaway scaling (e.g., Seal of Approval capped) and ensure all Jokers are viable. Legendary Jokers are high-impact but situational.</p>
+            </div>
+        </section>
     </main>
     
     <footer>
@@ -371,6 +732,7 @@
         // Add smooth animations on scroll
         document.addEventListener('DOMContentLoaded', function() {
             const projectCards = document.querySelectorAll('.project-card');
+            const jokersSection = document.querySelector('.jokers-section');
             
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
@@ -392,6 +754,12 @@
                                       transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) ${index * 0.1}s`;
                 observer.observe(card);
             });
+            
+            // Animate jokers section
+            jokersSection.style.opacity = '0';
+            jokersSection.style.transform = 'translateY(20px)';
+            jokersSection.style.transition = 'opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+            observer.observe(jokersSection);
             
             // Add hover effect for touch devices
             if ('ontouchstart' in window) {
